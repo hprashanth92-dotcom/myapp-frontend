@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         AWS_DEFAULT_REGION = 'us-east-1'
-        S3_BUCKET = 'clahantech2026'
+        S3_BUCKET = 'imdemox123'
         CLOUDFRONT_DISTRIBUTION_ID = 'E11601XAHJAF0N
 '
     }
