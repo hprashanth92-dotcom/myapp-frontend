@@ -11,24 +11,25 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                git(
-                    branch: 'main',
-                    url: 'https://github.com/hprashanth92-dotcom/myapp-frontend.git'
-                )
+                checkout scm
             }
         }
 
         stage('Verify Files') {
             steps {
-                sh 'ls -la'
+                sh '''
+                    pwd
+                    ls -la
+                '''
             }
         }
 
         stage('Deploy to S3') {
             steps {
-                withAWS(credentials: 'aws-credentials', region: 'us-east-1') {
+                withAWS(credentials: 'aws-credentials', region: "${AWS_DEFAULT_REGION}") {
                     sh '''
-                        aws s3 sync . s3://$S3_BUCKET --delete \
+                        aws s3 sync . s3://$S3_BUCKET \
+                        --delete \
                         --exclude ".git/*" \
                         --exclude "Jenkinsfile"
                     '''
@@ -38,7 +39,7 @@ pipeline {
 
         stage('Invalidate CloudFront Cache') {
             steps {
-                withAWS(credentials: 'aws-credentials', region: 'us-east-1') {
+                withAWS(credentials: 'aws-credentials', region: "${AWS_DEFAULT_REGION}") {
                     sh '''
                         aws cloudfront create-invalidation \
                         --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
@@ -56,6 +57,10 @@ pipeline {
 
         failure {
             echo 'Pipeline failed'
+        }
+
+        always {
+            cleanWs()
         }
     }
 }
